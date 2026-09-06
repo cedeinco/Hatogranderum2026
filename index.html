@@ -360,12 +360,39 @@
     var colCat=headers.find(function(h){return /categor/i.test(h);})||'';
     var cats={};
     DATA.forEach(function(row){if(colCat&&row[colCat]) cats[row[colCat]]=(cats[row[colCat]]||0)+1;});
-    var nc=Object.keys(cats).length;
+
+    // Desglose de categorías
+    var catHtml='';
+    if(Object.keys(cats).length){
+      catHtml=Object.keys(cats).sort().map(function(cat){
+        return '<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--line);font-size:13px;">'+
+          '<span style="color:var(--text);">'+escH(cat)+'</span>'+
+          '<span style="font-weight:700;color:var(--primary);font-size:15px;">'+cats[cat]+'</span>'+
+        '</div>';
+      }).join('');
+    } else {
+      catHtml='<span style="color:var(--muted);font-size:13px;">Sin datos</span>';
+    }
+
+    // Cuenta regresiva
+    var hoy=new Date(); hoy.setHours(0,0,0,0);
+    var evento=new Date('2026-09-27'); evento.setHours(0,0,0,0);
+    var diff=Math.round((evento-hoy)/(1000*60*60*24));
+    var diasTxt=diff>0?'Faltan <strong>'+diff+'</strong> días':diff===0?'¡Es hoy! 🎉':'Evento realizado';
+
     var bar=document.getElementById('statsBar');
+    bar.style.gridTemplateColumns='1fr 1.4fr 1fr';
     bar.innerHTML=
       mc('green','🏃 Inscritos totales',DATA.length)+
-      mc('orange','🏅 Categorías',nc||'—')+
-      mc('green','📅 Fecha del evento','27 sep 2026');
+      '<div class="metric-card orange" style="grid-row:1">'+
+        '<div class="metric-label">🏅 Inscritos por categoría</div>'+
+        '<div style="margin-top:6px;">'+catHtml+'</div>'+
+      '</div>'+
+      '<div class="metric-card green">'+
+        '<div class="metric-label">📅 Hatogrande Run 2026</div>'+
+        '<div class="metric-value" style="font-size:18px;margin-top:6px;">'+diasTxt+'</div>'+
+        '<div style="font-size:11px;color:var(--muted);margin-top:4px;">27 de septiembre de 2026</div>'+
+      '</div>';
     bar.style.display='grid';
   }
   function mc(c,l,v){return '<div class="metric-card '+c+'"><div class="metric-label">'+l+'</div><div class="metric-value">'+v+'</div></div>';}
