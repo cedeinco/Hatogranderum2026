@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Registro Hatogrande Run 2026</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:           #f0faf4;
+      --card:         #ffffff;
+      --text:         #0d1f14;
+      --muted:        #5a7a65;
+      --line:         #d4eadb;
+      --primary:      #2e7d4f;
+      --primary-light:#38a169;
+      --primary-dark: #1e5e38;
+      --warning:      #d97706;
+      --soft-lime:    #ecfdf5;
+      --soft-orange:  #fffbeb;
+      --soft-red:     #fef2f2;
+      --shadow-sm:    0 1px 3px rgba(13,31,20,0.08);
+      --shadow:       0 4px 16px rgba(13,31,20,0.10);
+      --shadow-lg:    0 8px 32px rgba(13,31,20,0.13);
+      --radius:       14px;
+      --radius-sm:    8px;
+      --font:         'DM Sans', sans-serif;
+      --mono:         'DM Mono', monospace;
+      --ease:         cubic-bezier(.16,1,.3,1);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: var(--font); background: var(--bg); color: var(--text); font-size: 14px; line-height: 1.5; -webkit-font-smoothing: antialiased; }
+
+    @keyframes fadeUp  { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+    @keyframes scaleIn { from{opacity:0;transform:scale(.97)} to{opacity:1;transform:scale(1)} }
+    @keyframes spin    { to{transform:rotate(360deg)} }
+    @keyframes toastIn { from{opacity:0;transform:translateX(-50%) translateY(14px) scale(.95)} to{opacity:1;transform:translateX(-50%) translateY(0) scale(1)} }
+    @keyframes toastOut{ from{opacity:1} to{opacity:0;transform:translateX(-50%) translateY(8px)} }
+    @keyframes run     { 0%,100%{transform:translateX(0)} 50%{transform:translateX(8px)} }
+
+    /* LOGIN */
+    .login-wrap { min-height:100vh; display:flex; align-items:center; justify-content:center; background:linear-gradient(135deg,var(--primary-dark) 0%,var(--primary) 55%,#38a169 100%); padding:24px; position:relative; overflow:hidden; }
+    .login-wrap::before { content:'🏃'; position:absolute; font-size:300px; opacity:.06; top:-30px; right:-30px; animation:run 2.5s ease-in-out infinite; pointer-events:none; }
+    .login-card { background:var(--card); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow-lg); padding:44px 40px; width:440px; max-width:100%; animation:scaleIn .4s var(--ease) both; position:relative; z-index:1; }
+    .login-icon  { font-size:52px; display:block; text-align:center; margin-bottom:10px; animation:run 2.5s ease-in-out infinite; }
+    .login-title { font-size:20px; font-weight:700; text-align:center; margin-bottom:4px; }
+    .login-sub   { font-size:13px; color:var(--muted); text-align:center; margin-bottom:32px; }
+    .login-field { margin-bottom:16px; }
+    .login-field label { display:block; font-size:11px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.5px; margin-bottom:6px; }
+    .login-divider { height:1px; background:var(--line); margin:24px 0; }
+    .login-footer  { text-align:center; font-size:12px; color:var(--muted); }
+    .msg { font-size:12px; font-weight:600; padding:8px 12px; border-radius:var(--radius-sm); margin-top:10px; }
+    .msg.error { background:var(--soft-red); color:#991b1b; border:1px solid #fecaca; }
+    .msg:empty { display:none; }
+
+    /* TOPBAR */
+    .topbar { background:var(--primary); color:#fff; padding:0 28px; height:58px; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:100; box-shadow:0 2px 12px rgba(46,125,79,.35); }
+    .topbar-left  { display:flex; align-items:center; gap:14px; }
+    .topbar-sep   { width:1px; height:24px; background:rgba(255,255,255,.25); }
+    .topbar-title { font-size:14px; font-weight:700; }
+    .topbar-sub   { font-size:12px; opacity:.7; }
+    .topbar-right { display:flex; align-items:center; gap:10px; }
+    .topbar-badge { background:rgba(255,255,255,.15); border:1px solid rgba(255,255,255,.25); padding:5px 13px; border-radius:999px; font-size:12px; font-weight:600; }
+    .btn-salir { background:rgba(220,38,38,.2); border:1px solid rgba(220,38,38,.35); color:#fff; padding:5px 12px; border-radius:999px; font-size:12px; font-weight:600; cursor:pointer; font-family:var(--font); transition:background .15s; }
+    .btn-salir:hover { background:rgba(220,38,38,.38); }
+
+    /* APP */
+    .app { max-width:1100px; margin:0 auto; padding:24px 20px 40px; }
+    .tabs { display:flex; gap:4px; margin-bottom:20px; border-bottom:2px solid var(--line); }
+    .tab-btn { padding:10px 22px; font-size:13px; font-weight:600; font-family:var(--font); border:none; background:none; color:var(--muted); cursor:pointer; border-bottom:2px solid transparent; margin-bottom:-2px; transition:color .15s,border-color .15s; }
+    .tab-btn:hover  { color:var(--text); }
+    .tab-btn.active { color:var(--primary); border-bottom-color:var(--primary); }
+    .tab-panel { display:none; }
+    .tab-panel.active { display:block; }
+
+    /* METRICS */
+    .summary-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:16px; }
+    .metric-card { background:var(--card); border:1px solid var(--line); border-radius:var(--radius); padding:14px 16px; box-shadow:var(--shadow-sm); position:relative; overflow:hidden; animation:fadeUp .5s var(--ease) both; transition:box-shadow .2s,transform .2s; }
+    .metric-card:hover { box-shadow:var(--shadow); transform:translateY(-2px); }
+    .metric-card::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; }
+    .metric-card.green::before  { background:var(--primary); }
+    .metric-card.orange::before { background:var(--warning); }
+    .metric-label { font-size:10px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.5px; margin-bottom:6px; }
+    .metric-value { font-size:22px; font-weight:700; }
+    .metric-card.green  .metric-value { color:var(--primary); }
+    .metric-card.orange .metric-value { color:var(--warning); }
+
+    /* BOTONES */
+    .btn { display:inline-flex; align-items:center; justify-content:center; gap:6px; padding:9px 16px; border-radius:var(--radius-sm); font-size:13px; font-weight:600; font-family:var(--font); border:none; cursor:pointer; transition:all .18s; white-space:nowrap; text-decoration:none; }
+    .btn-primary { background:var(--primary); color:#fff; box-shadow:0 2px 8px rgba(46,125,79,.2); }
+    .btn-primary:hover { background:var(--primary-light); transform:translateY(-1px); }
+    .btn-full { width:100%; }
+
+    /* INPUTS */
+    input { width:100%; border:1px solid #b7d9c2; border-radius:var(--radius-sm); padding:9px 12px; font-size:13px; font-family:var(--font); color:var(--text); background:#fff; outline:none; transition:border-color .2s,box-shadow .2s; }
+    input:focus { border-color:var(--primary); box-shadow:0 0 0 3px rgba(46,125,79,.12); }
+
+    /* SEARCH */
+    .search-row { display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap; margin-bottom:16px; }
+    .search-wrap { position:relative; flex:1; min-width:220px; max-width:420px; }
+    .search-wrap input { border-radius:999px; padding:9px 16px 9px 36px; }
+    .search-icon { position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--muted); font-size:14px; pointer-events:none; }
+    .result-count { font-size:12px; color:var(--muted); font-weight:600; }
+
+    /* ACORDEÓN */
+    .acc-list { background:var(--card); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow-sm); overflow:hidden; }
+    .acc-row { border-bottom:1px solid #eaf3ed; }
+    .acc-row:last-child { border-bottom:none; }
+    .acc-header { display:flex; align-items:center; gap:14px; padding:13px 18px; cursor:pointer; transition:background .15s; user-select:none; }
+    .acc-header:hover { background:#f7fdf9; }
+    .acc-header.open  { background:var(--soft-lime); }
+    .acc-num { font-family:var(--mono); font-size:11.5px; font-weight:600; color:var(--primary); background:var(--soft-lime); padding:3px 9px; border-radius:6px; flex-shrink:0; }
+    .acc-mid { flex:1; min-width:0; }
+    .acc-name { font-size:13.5px; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .acc-date { font-size:11px; color:var(--muted); margin-top:1px; }
+    .acc-chevron { font-size:11px; color:var(--muted); transition:transform .25s; flex-shrink:0; }
+    .acc-header.open .acc-chevron { transform:rotate(180deg); }
+    .acc-detail { display:none; border-top:1px solid var(--line); background:#f7fdf9; padding:16px 20px; }
+    .acc-detail.open { display:block; animation:fadeUp .25s var(--ease) both; }
+    .detail-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px 24px; }
+    .detail-item { display:flex; flex-direction:column; gap:2px; }
+    .detail-label { font-size:10px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.4px; }
+    .detail-value { font-size:13px; word-break:break-word; }
+
+    /* DESCARGA */
+    .card { background:var(--card); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow-sm); margin-bottom:16px; overflow:hidden; animation:fadeUp .45s var(--ease) both; }
+    .card-header { padding:14px 18px; border-bottom:1px solid var(--line); display:flex; align-items:center; }
+    .card-title  { font-size:13px; font-weight:700; display:flex; align-items:center; gap:8px; }
+    .card-body   { padding:16px 18px; }
+    .download-card { background:var(--card); border:1px solid var(--line); border-radius:var(--radius); padding:24px; box-shadow:var(--shadow-sm); display:flex; align-items:center; gap:20px; max-width:560px; transition:box-shadow .2s,transform .2s; animation:fadeUp .4s var(--ease) both; }
+    .download-card:hover { box-shadow:var(--shadow); transform:translateY(-2px); }
+    .download-card-icon  { font-size:32px; flex-shrink:0; width:60px; height:60px; background:var(--soft-lime); border-radius:var(--radius-sm); display:flex; align-items:center; justify-content:center; }
+    .download-card-body  { flex:1; }
+    .download-card-title { font-size:14px; font-weight:700; margin-bottom:4px; }
+    .download-card-sub   { font-size:12px; color:var(--muted); }
+
+    /* STATES */
+    .loading { text-align:center; padding:60px 20px; color:var(--muted); }
+    .loading-spinner { width:32px; height:32px; border:3px solid var(--line); border-top-color:var(--primary); border-radius:50%; animation:spin .8s linear infinite; margin:0 auto 12px; }
+    .empty { text-align:center; padding:60px 20px; color:var(--muted); font-size:14px; }
+    .empty-icon { font-size:36px; margin-bottom:10px; }
+
+    /* TOAST */
+    #toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(14px); background:var(--text); color:#fff; padding:11px 20px; border-radius:var(--radius-sm); font-size:13px; font-weight:500; box-shadow:var(--shadow-lg); z-index:9999; opacity:0; pointer-events:none; white-space:nowrap; max-width:92vw; }
+    #toast.show { animation:toastIn .3s var(--ease) both; opacity:1; }
+    #toast.hide { animation:toastOut .25s var(--ease) both; }
+    #toast.t-err { background:#7f1d1d; border-left:3px solid #f87171; }
+
+    /* RESPONSIVE */
+    @media(max-width:640px){
+      .app{padding:16px 12px 40px}
+      .topbar{padding:0 16px}
+      .topbar-title{font-size:12px}
+      .summary-grid{grid-template-columns:1fr}
+      .search-row{flex-direction:column;align-items:stretch}
+      .search-wrap{max-width:100%}
+      .detail-grid{grid-template-columns:1fr}
+      .download-card{flex-direction:column;max-width:100%}
+    }
+  </style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="loginWrap" class="login-wrap">
+  <div class="login-card">
+    <span class="login-icon">🏃</span>
+    <div class="login-title">Registro Hatogrande Run 2026</div>
+    <div class="login-sub">27 de septiembre · Panel de inscripciones</div>
+    <div class="login-field">
+      <label>Usuario</label>
+      <input type="text" id="loginUsuario" placeholder="Tu usuario"
+             onkeydown="if(event.key==='Enter') document.getElementById('loginClave').focus()">
+    </div>
+    <div class="login-field">
+      <label>Contraseña</label>
+      <input type="password" id="loginClave" placeholder="Tu contraseña"
+             onkeydown="if(event.key==='Enter') ejecutarLogin()">
+    </div>
+    <button class="btn btn-primary btn-full" style="margin-top:8px;" onclick="ejecutarLogin()">Ingresar →</button>
+    <div id="msgLogin" class="msg"></div>
+    <div class="login-divider"></div>
+    <div class="login-footer">🔒 Acceso restringido — Solo personal autorizado</div>
+  </div>
+</div>
+
+<!-- TOPBAR -->
+<div id="topbarWrap" class="topbar" style="display:none;">
+  <div class="topbar-left">
+    <span style="font-size:22px;">🏃</span>
+    <div class="topbar-sep"></div>
+    <div>
+      <div class="topbar-title">Registro Hatogrande Run 2026</div>
+      <div class="topbar-sub">Panel de inscripciones · 27 sep 2026</div>
+    </div>
+  </div>
+  <div class="topbar-right">
+    <span class="topbar-badge" id="topbarUsuario">👤</span>
+    <button class="btn-salir" onclick="cerrarSesion()">Salir ↩</button>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="appWrap" style="display:none;">
+  <div class="app">
+    <div class="tabs">
+      <button class="tab-btn active" id="tabInscritos" onclick="cambiarTab('inscritos')">🏃 Inscritos</button>
+      <button class="tab-btn"        id="tabDescargar" onclick="cambiarTab('descargar')">⬇️ Descargar base</button>
+    </div>
+
+    <!-- INSCRITOS -->
+    <div id="panelInscritos" class="tab-panel active">
+      <div class="summary-grid" id="statsBar" style="display:none;"></div>
+      <div class="search-row">
+        <div class="search-wrap">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="searchInput" placeholder="Buscar por nombre, cédula, categoría..." oninput="filterRows()">
+        </div>
+        <div class="result-count" id="resultCount"></div>
+      </div>
+      <div id="loadingBox" class="loading"><div class="loading-spinner"></div>Cargando inscripciones...</div>
+      <div class="acc-list" id="accList" style="display:none;"></div>
+      <div class="empty"    id="emptyBox" style="display:none;"><div class="empty-icon">🔎</div>Sin resultados</div>
+    </div>
+
+    <!-- DESCARGAR -->
+    <div id="panelDescargar" class="tab-panel">
+      <div class="card">
+        <div class="card-header"><span class="card-title">⬇️ Descargar base de datos</span></div>
+        <div class="card-body">
+          <p style="font-size:13px;color:var(--muted);margin-bottom:20px;">
+            Descarga la base completa de inscripciones en formato Excel (.xlsx). Siempre obtendrás la versión más reciente.
+          </p>
+          <div class="download-card">
+            <div class="download-card-icon">📊</div>
+            <div class="download-card-body">
+              <div class="download-card-title">Base de Inscripciones — Hatogrande Run 2026</div>
+              <div class="download-card-sub">Todos los registros · Actualizado en tiempo real</div>
+            </div>
+            <a class="btn btn-primary"
+               href="https://docs.google.com/spreadsheets/d/18tUbO5IgJSaVbdSQIMR0L8BN5Nns93Yt0EYKMNo3a1U/export?format=xlsx"
+               target="_blank" rel="noopener" style="flex-shrink:0;">⬇️ Descargar .xlsx</a>
+          </div>
+          <div style="margin-top:16px;padding:12px 14px;background:var(--soft-orange);border:1px solid #fde68a;border-radius:var(--radius-sm);font-size:12px;color:var(--warning);">
+            <strong>⚠️ Nota:</strong> Necesitas tener acceso al archivo en Google Drive. Si se abre en el navegador, usa <strong>Archivo → Descargar → Microsoft Excel (.xlsx)</strong>.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+  var CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTT3uDcu-TWlsp-WE9pHZamEJNo4PTW3KUVHeI0nh8IW1uYhIeA5vbtDR_JZL8gGuzYOfyecfTDQxZk/pub?output=csv';
+  var USUARIOS = [{ u: 'cedeinco', p: 'Cedeinco2026*' }];
+  var RECIENTES = 20;
+  var DATA = [];
+  var toastTimer;
+
+  function mostrarToast(msg, tipo) {
+    var el = document.getElementById('toast');
+    el.textContent = msg;
+    el.className = 'show' + (tipo === 'err' ? ' t-err' : '');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){ el.className='hide'; setTimeout(function(){ el.className=''; },300); }, 3500);
+  }
+
+  function ejecutarLogin() {
+    var u = document.getElementById('loginUsuario').value.trim().toLowerCase();
+    var p = document.getElementById('loginClave').value.trim();
+    var m = document.getElementById('msgLogin');
+    m.textContent=''; m.className='msg';
+    if (!USUARIOS.some(function(c){ return c.u===u && c.p===p; })) {
+      m.textContent='Usuario o contraseña incorrectos.'; m.className='msg error'; return;
+    }
+    sessionStorage.setItem('hgr_sesion', u);
+    activarApp(u);
+  }
+
+  function activarApp(u) {
+    document.getElementById('loginWrap').style.display='none';
+    document.getElementById('topbarWrap').style.display='flex';
+    document.getElementById('appWrap').style.display='block';
+    document.getElementById('topbarUsuario').textContent='👤 '+u;
+    cargarDatos();
+  }
+
+  function cerrarSesion() {
+    DATA=[]; sessionStorage.removeItem('hgr_sesion');
+    ['loginWrap','topbarWrap','appWrap'].forEach(function(id,i){
+      document.getElementById(id).style.display=['flex','none','none'][i];
+    });
+    document.getElementById('loginUsuario').value='';
+    document.getElementById('loginClave').value='';
+    document.getElementById('msgLogin').textContent='';
+    document.getElementById('accList').innerHTML='';
+    document.getElementById('accList').style.display='none';
+    document.getElementById('statsBar').style.display='none';
+    document.getElementById('loadingBox').style.display='block';
+    document.getElementById('loadingBox').innerHTML='<div class="loading-spinner"></div>Cargando inscripciones...';
+    document.getElementById('searchInput').value='';
+  }
+
+  function cambiarTab(tab) {
+    ['inscritos','descargar'].forEach(function(t){
+      var pId = t==='inscritos' ? 'panelInscritos' : 'panelDescargar';
+      var bId = t==='inscritos' ? 'tabInscritos'   : 'tabDescargar';
+      document.getElementById(pId).className='tab-panel'+(t===tab?' active':'');
+      document.getElementById(bId).className='tab-btn'+(t===tab?' active':'');
+    });
+  }
+
+  function parseCSV(text) {
+    var rows=[],row=[],field='',inQ=false;
+    for(var i=0;i<text.length;i++){
+      var ch=text[i];
+      if(inQ){ if(ch==='"'&&text[i+1]==='"'){field+='"';i++;}else if(ch==='"'){inQ=false;}else{field+=ch;} }
+      else{ if(ch==='"'){inQ=true;}else if(ch===','){row.push(field);field='';}else if(ch==='\n'){row.push(field);rows.push(row);row=[];field='';}else if(ch!=='\r'){field+=ch;} }
+    }
+    if(field!==''||row.length){row.push(field);rows.push(row);}
+    return rows;
+  }
+
+  function cargarDatos() {
+    document.getElementById('loadingBox').style.display='block';
+    document.getElementById('accList').style.display='none';
+    document.getElementById('emptyBox').style.display='none';
+    fetch(CSV_URL)
+      .then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.text(); })
+      .then(function(text){
+        var rows=parseCSV(text);
+        if(rows.length<2){DATA=[];onCargado();return;}
+        var headers=rows[0].map(function(h){return h.trim();});
+        DATA=[];
+        for(var i=1;i<rows.length;i++){
+          var fila=rows[i];
+          if(fila.every(function(c){return !c.trim();})) continue;
+          var obj={};
+          headers.forEach(function(h,idx){obj[h]=(fila[idx]||'').trim();});
+          DATA.push(obj);
+        }
+        onCargado();
+      })
+      .catch(function(err){
+        document.getElementById('loadingBox').innerHTML='<div class="empty"><div class="empty-icon">⚠️</div>No se pudo cargar la información.</div>';
+        mostrarToast('Error al cargar: '+err.message,'err');
+      });
+  }
+
+  function onCargado(){
+    document.getElementById('loadingBox').style.display='none';
+    if(!DATA.length){document.getElementById('emptyBox').style.display='block';return;}
+    renderStats(); mostrarRecientes();
+  }
+
+  function renderStats(){
+    var headers=DATA.length?Object.keys(DATA[0]):[];
+    var colCat=headers.find(function(h){return /categor/i.test(h);})||'';
+    var cats={};
+    DATA.forEach(function(row){if(colCat&&row[colCat]) cats[row[colCat]]=(cats[row[colCat]]||0)+1;});
+    var nc=Object.keys(cats).length;
+    var bar=document.getElementById('statsBar');
+    bar.innerHTML=
+      mc('green','🏃 Inscritos totales',DATA.length)+
+      mc('orange','🏅 Categorías',nc||'—')+
+      mc('green','📅 Fecha del evento','27 sep 2026');
+    bar.style.display='grid';
+  }
+  function mc(c,l,v){return '<div class="metric-card '+c+'"><div class="metric-label">'+l+'</div><div class="metric-value">'+v+'</div></div>';}
+
+  function escH(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  function cellH(v){return v?escH(v):'<span style="color:#b0c4ba;">N/A</span>';}
+
+  function mostrarRecientes(){
+    var lista=DATA.slice(-RECIENTES).reverse();
+    renderAccordion(lista);
+    document.getElementById('accList').style.display=lista.length?'block':'none';
+    document.getElementById('resultCount').textContent=DATA.length>RECIENTES
+      ?'Últimos '+lista.length+' de '+DATA.length+' — busca para ver más'
+      :DATA.length+' inscrito(s)';
+  }
+
+  function renderAccordion(lista){
+    var list=document.getElementById('accList');
+    if(!lista.length){list.innerHTML='';return;}
+    var headers=Object.keys(lista[0]);
+    var colN=headers.find(function(h){return /nombre/i.test(h);})||headers[1]||'';
+    var colC=headers.find(function(h){return /consecutivo/i.test(h);})||headers[0]||'';
+    var colF=headers.find(function(h){return /marca|fecha|timestamp/i.test(h);})||'';
+    var colK=headers.find(function(h){return /categor/i.test(h);})||'';
+
+    list.innerHTML=lista.map(function(row,i){
+      var id='row-'+i;
+      var num=row[colC]||(i+1);
+      var nombre=row[colN]||'Inscrito #'+num;
+      var sub=[colK?row[colK]:'',colF?'Registro: '+row[colF]:''].filter(Boolean).join(' · ');
+      var det=headers.filter(function(h){return h!==colC;}).map(function(h){
+        return '<div class="detail-item"><div class="detail-label">'+escH(h)+'</div><div class="detail-value">'+cellH(row[h])+'</div></div>';
+      }).join('');
+      return '<div class="acc-row">'+
+        '<div class="acc-header" onclick="toggleAcc(\''+id+'\')" id="acchead-'+id+'">'+
+          '<span class="acc-num">#'+escH(String(num))+'</span>'+
+          '<span class="acc-mid"><div class="acc-name">'+escH(nombre)+'</div><div class="acc-date">'+escH(sub)+'</div></span>'+
+          '<span class="acc-chevron">▼</span>'+
+        '</div>'+
+        '<div class="acc-detail" id="accdetail-'+id+'"><div class="detail-grid">'+det+'</div></div>'+
+      '</div>';
+    }).join('');
+  }
+
+  function toggleAcc(id){
+    var h=document.getElementById('acchead-'+id);
+    var d=document.getElementById('accdetail-'+id);
+    var o=h.classList.contains('open');
+    h.classList.toggle('open',!o); d.classList.toggle('open',!o);
+  }
+
+  function filterRows(){
+    var q=document.getElementById('searchInput').value.toLowerCase().trim();
+    if(!q){mostrarRecientes();return;}
+    var res=DATA.filter(function(row){return Object.values(row).join(' ').toLowerCase().indexOf(q)!==-1;}).reverse();
+    renderAccordion(res);
+    document.getElementById('accList').style.display=res.length?'block':'none';
+    document.getElementById('emptyBox').style.display=res.length?'none':'block';
+    document.getElementById('resultCount').textContent=res.length+' resultado(s) de '+DATA.length+' inscritos';
+  }
+
+  (function(){var s=sessionStorage.getItem('hgr_sesion');if(s) activarApp(s);})();
+</script>
+</body>
+</html>
