@@ -357,22 +357,38 @@
 
   function renderStats(){
     var headers=DATA.length?Object.keys(DATA[0]):[];
-    var colCat=headers.find(function(h){return /categor/i.test(h);})||'';
+    var colCat  = headers.find(function(h){return /categor/i.test(h);})||'';
+    var colPago = headers.find(function(h){return /cargue|autom|acepta/i.test(h);})||'';
+
+    // Categorías
     var cats={};
     DATA.forEach(function(row){if(colCat&&row[colCat]) cats[row[colCat]]=(cats[row[colCat]]||0)+1;});
+    var catHtml=Object.keys(cats).length
+      ? Object.keys(cats).sort().map(function(cat){
+          return '<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--line);font-size:13px;">'+
+            '<span style="color:var(--text);">'+escH(cat)+'</span>'+
+            '<span style="font-weight:700;color:var(--primary);font-size:15px;">'+cats[cat]+'</span>'+
+          '</div>';
+        }).join('')
+      : '<span style="color:var(--muted);font-size:13px;">Sin datos</span>';
 
-    // Desglose de categorías
-    var catHtml='';
-    if(Object.keys(cats).length){
-      catHtml=Object.keys(cats).sort().map(function(cat){
-        return '<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--line);font-size:13px;">'+
-          '<span style="color:var(--text);">'+escH(cat)+'</span>'+
-          '<span style="font-weight:700;color:var(--primary);font-size:15px;">'+cats[cat]+'</span>'+
-        '</div>';
-      }).join('');
-    } else {
-      catHtml='<span style="color:var(--muted);font-size:13px;">Sin datos</span>';
-    }
+    // Forma de pago
+    var nAuto=0, nPse=0;
+    DATA.forEach(function(row){
+      if(!colPago) return;
+      var v=String(row[colPago]||'').toLowerCase();
+      if(v==='sí'||v==='si') nAuto++;
+      else if(v) nPse++;
+    });
+    var pagoHtml=
+      '<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--line);font-size:13px;">'+
+        '<span>✅ Cargue automático</span>'+
+        '<span style="font-weight:700;color:var(--primary);font-size:15px;">'+nAuto+'</span>'+
+      '</div>'+
+      '<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;font-size:13px;">'+
+        '<span>🏦 PSE</span>'+
+        '<span style="font-weight:700;color:#e74c3c;font-size:15px;">'+nPse+'</span>'+
+      '</div>';
 
     // Cuenta regresiva
     var hoy=new Date(); hoy.setHours(0,0,0,0);
@@ -381,16 +397,20 @@
     var diasTxt=diff>0?'Faltan <strong>'+diff+'</strong> días':diff===0?'¡Es hoy! 🎉':'Evento realizado';
 
     var bar=document.getElementById('statsBar');
-    bar.style.gridTemplateColumns='1fr 1.4fr 1fr';
+    bar.style.gridTemplateColumns='0.8fr 1.3fr 1.3fr 0.9fr';
     bar.innerHTML=
       mc('green','🏃 Inscritos totales',DATA.length)+
-      '<div class="metric-card orange" style="grid-row:1">'+
-        '<div class="metric-label">🏅 Inscritos por categoría</div>'+
+      '<div class="metric-card orange">'+
+        '<div class="metric-label">🏅 Por categoría</div>'+
         '<div style="margin-top:6px;">'+catHtml+'</div>'+
       '</div>'+
       '<div class="metric-card green">'+
+        '<div class="metric-label">💳 Forma de pago</div>'+
+        '<div style="margin-top:6px;">'+pagoHtml+'</div>'+
+      '</div>'+
+      '<div class="metric-card green">'+
         '<div class="metric-label">📅 Hatogrande Run 2026</div>'+
-        '<div class="metric-value" style="font-size:18px;margin-top:6px;">'+diasTxt+'</div>'+
+        '<div class="metric-value" style="font-size:17px;margin-top:6px;">'+diasTxt+'</div>'+
         '<div style="font-size:11px;color:var(--muted);margin-top:4px;">27 de septiembre de 2026</div>'+
       '</div>';
     bar.style.display='grid';
@@ -413,23 +433,47 @@
     var list=document.getElementById('accList');
     if(!lista.length){list.innerHTML='';return;}
     var headers=Object.keys(lista[0]);
-    var colN=headers.find(function(h){return /nombre/i.test(h);})||headers[1]||'';
-    var colC=headers.find(function(h){return /consecutivo/i.test(h);})||headers[0]||'';
-    var colF=headers.find(function(h){return /marca|fecha|timestamp/i.test(h);})||'';
-    var colK=headers.find(function(h){return /categor/i.test(h);})||'';
+    var colC   = headers.find(function(h){return /consecutivo/i.test(h);})||headers[0]||'';
+    var colN   = headers.find(function(h){return /nombre.*socio|socio.*titular|nombre/i.test(h);})||headers[1]||'';
+    var colAcc = headers.find(function(h){return /acci.n|accion/i.test(h);})||'';
+    var colK   = headers.find(function(h){return /categor/i.test(h);})||'';
+    var colF   = headers.find(function(h){return /marca|timestamp/i.test(h);})||'';
+    var colP   = headers.find(function(h){return /cargue|autom|acepta/i.test(h);})||'';
 
     list.innerHTML=lista.map(function(row,i){
-      var id='row-'+i;
-      var num=row[colC]||(i+1);
-      var nombre=row[colN]||'Inscrito #'+num;
-      var sub=[colK?row[colK]:'',colF?'Registro: '+row[colF]:''].filter(Boolean).join(' · ');
+      var id    = 'row-'+i;
+      var num   = row[colC]||(i+1);
+      var nombre= row[colN]||'Inscrito #'+num;
+      var accion= colAcc ? 'Acción: '+row[colAcc] : '';
+      var cat   = colK ? row[colK] : '';
+      var fecha = colF ? 'Registro: '+row[colF] : '';
+      var sub   = [cat, accion, fecha].filter(Boolean).join(' · ');
+
+      // Badge forma de pago
+      var pago  = colP ? String(row[colP]||'').toLowerCase() : '';
+      var badge = pago==='sí'||pago==='si'
+        ? '<span style="flex-shrink:0;font-size:10px;font-weight:700;color:#166534;background:#dcfce7;border:1px solid #86efac;padding:2px 8px;border-radius:999px;">✅ Cargue auto</span>'
+        : pago
+          ? '<span style="flex-shrink:0;font-size:10px;font-weight:700;color:#991b1b;background:#fee2e2;border:1px solid #fca5a5;padding:2px 8px;border-radius:999px;">🏦 PSE</span>'
+          : '';
+
       var det=headers.filter(function(h){return h!==colC;}).map(function(h){
-        return '<div class="detail-item"><div class="detail-label">'+escH(h)+'</div><div class="detail-value">'+cellH(row[h])+'</div></div>';
+        var val=row[h]||'';
+        // Si parece URL de Drive, mostrarlo como enlace
+        var display=(/drive\.google\.com/i.test(val))
+          ? '<a href="'+escH(val)+'" target="_blank" style="color:var(--primary);font-weight:600;">Ver archivo ↗</a>'
+          : cellH(val);
+        return '<div class="detail-item"><div class="detail-label">'+escH(h)+'</div><div class="detail-value">'+display+'</div></div>';
       }).join('');
+
       return '<div class="acc-row">'+
         '<div class="acc-header" onclick="toggleAcc(\''+id+'\')" id="acchead-'+id+'">'+
-          '<span class="acc-num">#'+escH(String(num))+'</span>'+
-          '<span class="acc-mid"><div class="acc-name">'+escH(nombre)+'</div><div class="acc-date">'+escH(sub)+'</div></span>'+
+          '<span class="acc-num">'+escH(String(num))+'</span>'+
+          '<span class="acc-mid">'+
+            '<div class="acc-name">'+escH(nombre)+'</div>'+
+            '<div class="acc-date">'+escH(sub)+'</div>'+
+          '</span>'+
+          badge+
           '<span class="acc-chevron">▼</span>'+
         '</div>'+
         '<div class="acc-detail" id="accdetail-'+id+'"><div class="detail-grid">'+det+'</div></div>'+
